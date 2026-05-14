@@ -88,6 +88,10 @@ textarea { min-height: 86px; resize: vertical; }
 }
 .card-title { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
 .meta { color: var(--muted); font-size: 13px; }
+.entry-line { display: grid; grid-template-columns: auto auto 34px minmax(86px, 1fr) 34px auto 34px minmax(86px, 1fr) 34px auto minmax(112px, 1fr) auto; gap: 6px; align-items: center; }
+.entry-line input, .entry-line select, .entry-line button { min-height: 38px; padding: 6px 8px; }
+.entry-line button { width: auto; }
+.entry-line .total { white-space: nowrap; font-weight: 700; }
 .badge { width: auto; min-height: 0; padding: 4px 8px; border-radius: 99px; background: #edf2f7; font-size: 12px; }
 .badge.Approved { color: var(--ok); }
 .badge.Rejected { color: var(--bad); }
@@ -97,4 +101,8 @@ textarea { min-height: 86px; resize: vertical; }
   .two { grid-template-columns: 1fr 1fr; }
   .filters { grid-template-columns: repeat(4, 1fr); }
   .panel { padding: 18px; }
+}
+@media (max-width: 759px) {
+  .entry-line { grid-template-columns: auto auto 34px 1fr 34px; }
+  .entry-line .total, .entry-line select, .entry-line [data-save] { grid-column: 1 / -1; width: 100%; }
 }
