@@ -135,7 +135,7 @@ async function registerEmployee(event) {
   busy(form, true);
   message('registerMessage', 'Creating employee...');
   try {
-    const result = await api('registerEmployeeCompact', compactRegisterData(form));
+    const result = await registerEmployeeChunked(compactRegisterData(form));
     message('registerMessage', `Employee created. Username: ${result.username}`, 'ok');
     form.reset();
     setToday();
@@ -144,6 +144,18 @@ async function registerEmployee(event) {
   } finally {
     busy(form, false);
   }
+}
+
+async function registerEmployeeChunked(payload) {
+  const id = 'reg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  const size = 700;
+  const total = Math.ceil(encoded.length / size);
+  for (let index = 0; index < total; index++) {
+    const part = encoded.slice(index * size, (index + 1) * size);
+    await api('registerEmployeeChunk', { id, index, total, part });
+  }
+  return api('registerEmployeeCommit', { id, total });
 }
 
 function compactRegisterData(form) {
