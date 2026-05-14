@@ -135,7 +135,7 @@ async function registerEmployee(event) {
   busy(form, true);
   message('registerMessage', 'Creating employee...');
   try {
-    const result = await api('registerEmployee', formData(form));
+    const result = await api('registerEmployeeCompact', compactRegisterData(form));
     message('registerMessage', `Employee created. Username: ${result.username}`, 'ok');
     form.reset();
     setToday();
@@ -144,6 +144,17 @@ async function registerEmployee(event) {
   } finally {
     busy(form, false);
   }
+}
+
+function compactRegisterData(form) {
+  const data = formData(form);
+  const fields = [
+    'firstName', 'surname', 'password', 'fullName', 'nickName', 'homeAddress',
+    'mobile', 'email', 'emergencyContactName', 'emergencyPhone', 'dateOfBirth',
+    'taxFileNo', 'visaDetails', 'availability', 'bank', 'bsb', 'accountNo',
+    'accountName', 'superFundName', 'superAbn', 'spinNo', 'accountInvestorNo'
+  ];
+  return { values: fields.map(field => data[field] || '') };
 }
 
 async function managerLogin(event) {
