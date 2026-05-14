@@ -98,32 +98,3 @@
 
       <div id="managerWorkspace" class="hidden">
         <section class="panel">
-          <h2>Review Hours</h2>
-          <div class="filters">
-            <select id="statusFilter"><option>Pending</option><option>Approved</option><option>Rejected</option><option>All</option></select>
-            <input id="fromDate" type="date">
-            <input id="toDate" type="date">
-            <input id="employeeFilter" placeholder="Username">
-          </div>
-          <button id="loadEntries" type="button">Load Entries</button>
-          <div id="entriesList" class="list"></div>
-          <p id="managerMessage" class="message"></p>
-        </section>
-
-        <section class="panel">
-          <h2>Reports</h2>
-          <div class="filters">
-            <select id="reportPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
-            <button id="runReport" type="button">Run</button>
-            <button id="exportReport" type="button">Excel</button>
-          </div>
-          <div id="reportList" class="list"></div>
-          <p id="reportMessage" class="message"></p>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <script src="app.js?v=3"></script>
-</body>
-</html>
