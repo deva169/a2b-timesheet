@@ -46,240 +46,55 @@ function api(action, payload = {}) {
   });
 }
 
+function postApi(action, payload = {}) {
+  const requestId = 'post_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const iframeName = 'frame_' + requestId;
+  return new Promise((resolve, reject) => {
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.className = 'hidden';
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = APPS_SCRIPT_URL;
+    form.target = iframeName;
+    form.className = 'hidden';
+    addHidden(form, 'action', action);
+    addHidden(form, 'requestId', requestId);
+    addHidden(form, 'payload', JSON.stringify(payload));
+    const timeout = setTimeout(() => cleanup(new Error('Request timed out.')), 45000);
+    function onMessage(event) {
+      let response = event.data;
+      if (typeof response === 'string') {
+        try { response = JSON.parse(response); } catch (error) { return; }
+      }
+      if (!response || response.requestId !== requestId) return;
+      if (response.ok) cleanup(null, response);
+      else cleanup(new Error(response.error || 'Request failed.'));
+    }
+    function cleanup(error, response) {
+      clearTimeout(timeout);
+      window.removeEventListener('message', onMessage);
+      form.remove();
+      iframe.remove();
+      error ? reject(error) : resolve(response);
+    }
+    window.addEventListener('message', onMessage);
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+    form.submit();
+  });
+}
+
+function addHidden(form, name, value) {
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = name;
+  input.value = value;
+  form.appendChild(input);
+}
+
 function formData(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
 function message(id, text, kind = '') {
-  const node = document.getElementById(id);
-  node.textContent = text || '';
-  node.className = 'message ' + kind;
-}
-
-function busy(form, isBusy) {
-  form.querySelectorAll('button').forEach(button => button.disabled = isBusy);
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', screen.id === id));
-  document.querySelectorAll('[data-screen]').forEach(tab => tab.classList.toggle('active', tab.dataset.screen === id));
-}
-
-function setToday() {
-  const today = new Date().toISOString().slice(0, 10);
-  document.querySelectorAll('input[type="date"]').forEach(input => {
-    if (!input.value) input.value = today;
-  });
-}
-
-function fillSelect(id, values, blank = false) {
-  const select = document.getElementById(id);
-  select.innerHTML = '';
-  if (blank) select.add(new Option('Select', ''));
-  values.forEach(value => select.add(new Option(value, value)));
-}
-
-async function bootstrap() {
-  try {
-    const result = await api('getBootstrap');
-    state.locations = result.locations || [];
-    fillSelect('employeeLocation', state.locations, true);
-    fillSelect('managerName', result.managerNames || []);
-    setToday();
-  } catch (error) {
-    message('employeeLoginMessage', error.message, 'err');
-  }
-}
-
-async function employeeLogin(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  busy(form, true);
-  message('employeeLoginMessage', 'Checking login...');
-  try {
-    const data = formData(form);
-    const result = await api('loginEmployee', data);
-    state.employee = result.employee;
-    state.employeePassword = data.password;
-    document.getElementById('employeeIdentity').textContent = `${result.employee.fullName} (${result.employee.username})`;
-    document.getElementById('hoursForm').classList.remove('hidden');
-    message('employeeLoginMessage', 'Logged in.', 'ok');
-  } catch (error) {
-    message('employeeLoginMessage', error.message, 'err');
-  } finally {
-    busy(form, false);
-  }
-}
-
-async function submitHours(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  busy(form, true);
-  message('hoursMessage', 'Submitting shift...');
-  try {
-    const payload = { ...formData(form), username: state.employee.username, password: state.employeePassword };
-    const result = await api('submitTimeEntry', payload);
-    message('hoursMessage', `Submitted for approval: ${Number(result.totalHours).toFixed(2)} hrs`, 'ok');
-    form.reset();
-    setToday();
-  } catch (error) {
-    message('hoursMessage', error.message, 'err');
-  } finally {
-    busy(form, false);
-  }
-}
-
-async function registerEmployee(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  busy(form, true);
-  message('registerMessage', 'Creating employee...');
-  try {
-    const result = await registerEmployeeChunked(compactRegisterData(form));
-    message('registerMessage', `Employee created. Username: ${result.username}`, 'ok');
-    form.reset();
-    setToday();
-  } catch (error) {
-    message('registerMessage', error.message, 'err');
-  } finally {
-    busy(form, false);
-  }
-}
-
-async function registerEmployeeChunked(payload) {
-  const id = 'reg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  const encoded = encodeURIComponent(JSON.stringify(payload));
-  const size = 700;
-  const total = Math.ceil(encoded.length / size);
-  for (let index = 0; index < total; index++) {
-    const part = encoded.slice(index * size, (index + 1) * size);
-    await api('registerEmployeeChunk', { id, index, total, part });
-  }
-  return api('registerEmployeeCommit', { id, total });
-}
-
-function compactRegisterData(form) {
-  const data = formData(form);
-  const fields = [
-    'firstName', 'surname', 'password', 'fullName', 'nickName', 'homeAddress',
-    'mobile', 'email', 'emergencyContactName', 'emergencyPhone', 'dateOfBirth',
-    'taxFileNo', 'visaDetails', 'availability', 'bank', 'bsb', 'accountNo',
-    'accountName', 'superFundName', 'superAbn', 'spinNo', 'accountInvestorNo'
-  ];
-  return { values: fields.map(field => data[field] || '') };
-}
-
-async function managerLogin(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  busy(form, true);
-  message('managerLoginMessage', 'Checking manager login...');
-  try {
-    const data = formData(form);
-    const result = await api('managerLogin', data);
-    state.manager = result.manager;
-    state.managerPin = data.pin;
-    document.getElementById('managerWorkspace').classList.remove('hidden');
-    message('managerLoginMessage', `Logged in as ${result.manager}.`, 'ok');
-    await loadEntries();
-  } catch (error) {
-    message('managerLoginMessage', error.message, 'err');
-  } finally {
-    busy(form, false);
-  }
-}
-
-function managerPayload(extra = {}) {
-  return {
-    name: state.manager,
-    pin: state.managerPin,
-    filters: {
-      status: document.getElementById('statusFilter').value,
-      fromDate: document.getElementById('fromDate').value,
-      toDate: document.getElementById('toDate').value,
-      username: document.getElementById('employeeFilter').value,
-      period: document.getElementById('reportPeriod').value
-    },
-    ...extra
-  };
-}
-
-async function loadEntries() {
-  message('managerMessage', 'Loading entries...');
-  try {
-    const result = await api('managerGetEntries', managerPayload());
-    renderEntries(result.entries || []);
-    message('managerMessage', `${(result.entries || []).length} entries loaded.`, 'ok');
-  } catch (error) {
-    message('managerMessage', error.message, 'err');
-  }
-}
-
-function renderEntries(entries) {
-  const list = document.getElementById('entriesList');
-  list.innerHTML = entries.length ? '' : '<article class="card">No entries found.</article>';
-  entries.forEach(entry => {
-    const card = document.createElement('article');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-title"><span>${escapeHtml(entry.employeeName)}</span><span class="badge ${entry.status}">${entry.status}</span></div>
-      <div class="meta">${escapeHtml(entry.username)} | ${escapeHtml(entry.workDate)} | ${Number(entry.totalHours).toFixed(2)} hrs</div>
-      <label>Location<select data-field="location">${state.locations.map(loc => `<option ${loc === entry.location ? 'selected' : ''}>${escapeHtml(loc)}</option>`).join('')}</select></label>
-      <div class="two"><label>Start<input type="time" data-field="shiftStart" value="${escapeHtml(entry.shiftStart)}"></label><label>Close<input type="time" data-field="shiftClose" value="${escapeHtml(entry.shiftClose)}"></label></div>
-      <label>Date<input type="date" data-field="workDate" value="${escapeHtml(entry.workDate)}"></label>
-      <label>Status<select data-field="status"><option ${entry.status === 'Pending' ? 'selected' : ''}>Pending</option><option ${entry.status === 'Approved' ? 'selected' : ''}>Approved</option><option ${entry.status === 'Rejected' ? 'selected' : ''}>Rejected</option></select></label>
-      <label>Notes<textarea data-field="managerNotes">${escapeHtml(entry.managerNotes)}</textarea></label>
-      <button type="button" class="primary">Save</button>
-    `;
-    card.querySelector('button').addEventListener('click', () => saveEntry(entry, card));
-    list.appendChild(card);
-  });
-}
-
-async function saveEntry(entry, card) {
-  const payload = { entryId: entry.entryId };
-  card.querySelectorAll('[data-field]').forEach(field => payload[field.dataset.field] = field.value);
-  message('managerMessage', 'Saving entry...');
-  try {
-    await api('managerUpdateEntry', managerPayload({ entry: payload }));
-    message('managerMessage', 'Entry saved.', 'ok');
-    await loadEntries();
-  } catch (error) {
-    message('managerMessage', error.message, 'err');
-  }
-}
-
-async function runReport() {
-  message('reportMessage', 'Running report...');
-  try {
-    const result = await api('managerReport', managerPayload());
-    const list = document.getElementById('reportList');
-    list.innerHTML = result.rows.length ? '' : '<article class="card">No approved hours found.</article>';
-    result.rows.forEach(row => {
-      const card = document.createElement('article');
-      card.className = 'card';
-      card.innerHTML = `<div class="card-title"><span>${escapeHtml(row.employeeName)}</span><span>${escapeHtml(row.hoursText)}</span></div><div class="meta">${escapeHtml(row.username)} | ${escapeHtml(row.period)} | ${row.shifts} shifts</div>`;
-      list.appendChild(card);
-    });
-    message('reportMessage', `${result.rows.length} report rows.`, 'ok');
-  } catch (error) {
-    message('reportMessage', error.message, 'err');
-  }
-}
-
-async function exportReport() {
-  message('reportMessage', 'Creating Excel file...');
-  try {
-    const result = await api('exportReportToExcel', managerPayload());
-    message('reportMessage', `Created: ${result.name}`, 'ok');
-    window.open(result.url, '_blank');
-  } catch (error) {
-    message('reportMessage', error.message, 'err');
-  }
-}
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-}
-
-bootstrap();
