@@ -7,94 +7,35 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>A2B Timesheet</h1>
-      <p>Mobile shift logging and manager approval</p>
-    </div>
-    <button id="syncButton" class="icon-button" type="button" title="Refresh">Refresh</button>
-  </header>
-
-  <nav class="tabs" aria-label="Main">
-    <button class="active" type="button" data-screen="employeeScreen">Employee</button>
-    <button type="button" data-screen="managerScreen">Manager</button>
-    <button type="button" data-screen="registerScreen">Register</button>
-  </nav>
-
+  <header class="topbar"><div><h1>A2B Timesheet</h1><p>Mobile shift logging and manager approval</p></div><button id="syncButton" class="icon-button" type="button" title="Refresh">Refresh</button></header>
+  <nav class="tabs" aria-label="Main"><button class="active" type="button" data-screen="employeeScreen">Employee</button><button type="button" data-screen="managerScreen">Manager</button><button type="button" data-screen="registerScreen">Register</button></nav>
   <main>
     <section id="employeeScreen" class="screen active">
-      <form id="employeeLoginForm" class="panel">
-        <h2>Employee Login</h2>
-        <label>Username<input name="username" autocomplete="username" required></label>
-        <label>Four digit password<input name="password" type="password" inputmode="numeric" maxlength="4" required></label>
-        <button class="primary" type="submit">Login</button>
-        <p id="employeeLoginMessage" class="message"></p>
-      </form>
-
-      <form id="hoursForm" class="panel hidden">
-        <h2>Submit Hours</h2>
-        <div class="identity" id="employeeIdentity"></div>
-        <label>Work date<input name="workDate" type="date" required></label>
-        <label>Location<select name="location" id="employeeLocation" required></select></label>
-        <div class="two">
-          <label>Start<input name="shiftStart" type="time" required></label>
-          <label>Close<input name="shiftClose" type="time" required></label>
-        </div>
-        <button class="primary" type="submit">Submit Shift</button>
-        <p id="hoursMessage" class="message"></p>
-      </form>
+      <form id="employeeLoginForm" class="panel"><h2>Employee Login</h2><label>Username<input name="username" autocomplete="username" required></label><label>Four digit password<input name="password" type="password" inputmode="numeric" maxlength="4" required></label><button class="primary" type="submit">Login</button><p id="employeeLoginMessage" class="message"></p></form>
+      <form id="hoursForm" class="panel hidden"><h2>Submit Hours</h2><div class="identity" id="employeeIdentity"></div><label>Work date<input name="workDate" type="date" required></label><label>Location<select name="location" id="employeeLocation" required></select></label><div class="two"><label>Start<input name="shiftStart" type="time" required></label><label>Close<input name="shiftClose" type="time" required></label></div><button class="primary" type="submit">Submit Shift</button><p id="hoursMessage" class="message"></p></form>
     </section>
-
+    <section id="managerScreen" class="screen">
+      <form id="managerLoginForm" class="panel"><h2>Manager Login</h2><label>Manager<select id="managerName" name="name"></select></label><label>PIN<input name="pin" type="password" inputmode="numeric" maxlength="4" required></label><button class="primary" type="submit">Login</button><p id="managerLoginMessage" class="message"></p></form>
+      <div id="managerWorkspace" class="hidden">
+        <section class="panel"><h2>Review Hours</h2><div class="filters"><select id="statusFilter"><option>Pending</option><option>Approved</option><option>Rejected</option><option>All</option></select><input id="fromDate" type="date"><input id="toDate" type="date"><input id="employeeFilter" placeholder="Username"></div><button id="loadEntries" type="button">Load Entries</button><div id="entriesList" class="list"></div><p id="managerMessage" class="message"></p></section>
+        <section class="panel"><h2>Reports</h2><div class="filters"><select id="reportPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select><button id="runReport" type="button">Run</button><button id="exportReport" type="button">Excel</button></div><div id="reportList" class="list"></div><p id="reportMessage" class="message"></p></section>
+      </div>
+    </section>
     <section id="registerScreen" class="screen">
       <form id="registerForm" class="panel">
         <h2>New Employee</h2>
-        <div class="two">
-          <label>First name<input name="firstName" required></label>
-          <label>Surname<input name="surname" required></label>
-        </div>
-        <label>Four digit password<input name="password" inputmode="numeric" maxlength="4" required></label>
-        <label>Full name for payroll<input name="fullName" required></label>
-        <label>Nick name<input name="nickName" required></label>
-        <label>Home address<textarea name="homeAddress" required></textarea></label>
-        <label>Mobile<input name="mobile" inputmode="numeric" maxlength="10" required></label>
-        <label>Email<input name="email" type="email" required></label>
-        <div class="two">
-          <label>Emergency contact<input name="emergencyContactName" required></label>
-          <label>Emergency phone<input name="emergencyPhone" inputmode="numeric" maxlength="10" required></label>
-        </div>
-        <div class="two">
-          <label>Date of birth<input name="dateOfBirth" type="date" required></label>
-          <label>Tax file no<input name="taxFileNo" inputmode="numeric" maxlength="9" required></label>
-        </div>
-        <label>Visa details<input name="visaDetails" required></label>
-        <label>Availability<textarea name="availability" required></textarea></label>
-        <h3>Bank</h3>
-        <label>Bank<input name="bank" required></label>
-        <div class="two">
-          <label>BSB<input name="bsb" inputmode="numeric" maxlength="6" required></label>
-          <label>Account no<input name="accountNo" inputmode="numeric" required></label>
-        </div>
-        <label>Account name<input name="accountName" required></label>
-        <h3>Super</h3>
-        <label>Fund name<input name="superFundName" required></label>
-        <div class="two">
-          <label>ABN<input name="superAbn" inputmode="numeric" required></label>
-          <label>USI<input name="spinNo" required></label>
-        </div>
-        <label>Member number<input name="accountInvestorNo" required></label>
-        <button class="primary" type="submit">Create Login</button>
-        <p id="registerMessage" class="message"></p>
+        <div class="two"><label>First name<input name="firstName" required></label><label>Surname<input name="surname" required></label></div>
+        <label>Four digit password<input name="password" inputmode="numeric" maxlength="4" required></label><label>Full name for payroll<input name="fullName" required></label><label>Nick name<input name="nickName" required></label><label>Home address<textarea name="homeAddress" required></textarea></label><label>Mobile<input name="mobile" inputmode="numeric" maxlength="10" required></label><label>Email<input name="email" type="email" required></label>
+        <div class="two"><label>Emergency contact<input name="emergencyContactName" required></label><label>Emergency phone<input name="emergencyPhone" inputmode="numeric" maxlength="10" required></label></div>
+        <div class="two"><label>Date of birth<input name="dateOfBirth" type="date" required></label><label>Tax file no<input name="taxFileNo" inputmode="numeric" maxlength="9" required></label></div>
+        <label>Visa details<input name="visaDetails" required></label><label>Availability<textarea name="availability" required></textarea></label><h3>Bank</h3><label>Bank<input name="bank" required></label>
+        <div class="two"><label>BSB<input name="bsb" inputmode="numeric" maxlength="6" required></label><label>Account no<input name="accountNo" inputmode="numeric" required></label></div>
+        <label>Account name<input name="accountName" required></label><h3>Super</h3><label>Fund name<input name="superFundName" required></label>
+        <div class="two"><label>ABN<input name="superAbn" inputmode="numeric" required></label><label>USI<input name="spinNo" required></label></div>
+        <label>Member number<input name="accountInvestorNo" required></label><button class="primary" type="submit">Create Login</button><p id="registerMessage" class="message"></p>
       </form>
     </section>
-
-    <section id="managerScreen" class="screen">
-      <form id="managerLoginForm" class="panel">
-        <h2>Manager Login</h2>
-        <label>Manager<select id="managerName" name="name"></select></label>
-        <label>PIN<input name="pin" type="password" inputmode="numeric" maxlength="4" required></label>
-        <button class="primary" type="submit">Login</button>
-        <p id="managerLoginMessage" class="message"></p>
-      </form>
-
-      <div id="managerWorkspace" class="hidden">
-        <section class="panel">
+  </main>
+  <script src="app.js?v=5"></script>
+</body>
+</html>
