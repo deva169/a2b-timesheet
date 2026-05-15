@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "a2b-timesheet-api",
+  "name": "a2b-timesheet",
   "compatibility_date": "2026-05-14",
   "observability": {
     "enabled": true
