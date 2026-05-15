@@ -88,10 +88,17 @@ textarea { min-height: 86px; resize: vertical; }
 }
 .card-title { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
 .meta { color: var(--muted); font-size: 13px; }
+.time-control { display: grid; grid-template-columns: 46px 1fr 46px; gap: 6px; }
+.time-control button { padding: 0; font-size: 18px; }
 .entry-line { display: grid; grid-template-columns: auto auto 34px minmax(86px, 1fr) 34px auto 34px minmax(86px, 1fr) 34px auto minmax(112px, 1fr) auto; gap: 6px; align-items: center; }
 .entry-line input, .entry-line select, .entry-line button { min-height: 38px; padding: 6px 8px; }
 .entry-line button { width: auto; }
 .entry-line .total { white-space: nowrap; font-weight: 700; }
+.review-card { gap: 8px; }
+.review-top { display: grid; grid-template-columns: 1fr minmax(120px, 170px); gap: 8px; align-items: center; }
+.review-time { display: grid; grid-template-columns: auto 36px minmax(86px, 1fr) 36px auto 36px minmax(86px, 1fr) 36px minmax(80px, auto) auto; gap: 6px; align-items: center; }
+.review-time button { min-height: 38px; padding: 6px 8px; }
+.review-time output { min-height: 38px; display: grid; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; font-weight: 700; white-space: nowrap; }
 .badge { width: auto; min-height: 0; padding: 4px 8px; border-radius: 99px; background: #edf2f7; font-size: 12px; }
 .badge.Approved { color: var(--ok); }
 .badge.Rejected { color: var(--bad); }
@@ -105,4 +112,7 @@ textarea { min-height: 86px; resize: vertical; }
 @media (max-width: 759px) {
   .entry-line { grid-template-columns: auto auto 34px 1fr 34px; }
   .entry-line .total, .entry-line select, .entry-line [data-save] { grid-column: 1 / -1; width: 100%; }
+  .review-top { grid-template-columns: 1fr; }
+  .review-time { grid-template-columns: auto 38px 1fr 38px; }
+  .review-time output, .review-time [data-save] { grid-column: 1 / -1; width: 100%; }
 }
