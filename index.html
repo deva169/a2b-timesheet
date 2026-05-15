@@ -12,7 +12,7 @@
   <main>
     <section id="employeeScreen" class="screen active">
       <form id="employeeLoginForm" class="panel"><h2>Employee Login</h2><label>Username<input name="username" autocomplete="username" required></label><label>Four digit password<input name="password" type="password" inputmode="numeric" maxlength="4" required></label><button class="primary" type="submit">Login</button><p id="employeeLoginMessage" class="message"></p></form>
-      <form id="hoursForm" class="panel hidden"><h2>Submit Hours</h2><label>Work date<input name="workDate" type="date" readonly required></label><label>Location<select name="location" id="employeeLocation" required></select></label><div class="two"><label>ST<input name="shiftStart" type="time" step="300" required></label><label>FT<input name="shiftClose" type="time" step="300" required></label></div><button class="primary" type="submit">Submit Shift</button><p id="hoursMessage" class="message"></p></form>
+      <form id="hoursForm" class="panel hidden"><h2>Submit Hours</h2><label>Work date<input name="workDate" type="date" readonly required></label><label>Location<select name="location" id="employeeLocation" required></select></label><div class="two"><label>ST<div class="time-control"><button type="button" data-employee-step="shiftStart:-1">-</button><input name="shiftStart" inputmode="text" placeholder="11:03 AM" required><button type="button" data-employee-step="shiftStart:1">+</button></div></label><label>FT<div class="time-control"><button type="button" data-employee-step="shiftClose:-1">-</button><input name="shiftClose" inputmode="text" placeholder="5:07 PM" required><button type="button" data-employee-step="shiftClose:1">+</button></div></label></div><button class="primary" type="submit">Submit Shift</button><p id="hoursMessage" class="message"></p></form>
     </section>
     <section id="managerScreen" class="screen">
       <form id="managerLoginForm" class="panel"><h2>Manager Login</h2><label>Manager<select id="managerName" name="name"></select></label><label>PIN<input name="pin" type="password" inputmode="numeric" maxlength="4" required></label><button class="primary" type="submit">Login</button><p id="managerLoginMessage" class="message"></p></form>
@@ -37,6 +37,6 @@
     </section>
   </main>
   <script>document.querySelectorAll('[data-screen]').forEach(function(b){b.onclick=function(){document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('active',s.id===b.dataset.screen)});document.querySelectorAll('[data-screen]').forEach(function(t){t.classList.toggle('active',t===b)})}});</script>
-  <script src="app-v12.js"></script>
+  <script src="app-v13.js"></script>
 </body>
 </html>
